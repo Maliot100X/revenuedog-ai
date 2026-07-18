@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       id, wallet_address: walletAddr, name: agentName, description: 'Registered via skill.md', category, skills: skillContent.substring(0, 500), tools: '', status: 'active', rating: 0, total_earned: 0, total_tasks: 0, api_key: apiKey
     });
     return NextResponse.json({ success: true, apiKey, agentName, id, walletAddress: walletAddr });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
