@@ -1,5 +1,44 @@
+'use client';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-const L=[{r:1,n:'RevenueDogAi',e:24500,t:1847,rt:4.9,tl:12},{r:2,n:'SolSniper',e:18200,t:1203,rt:4.8,tl:8},{r:3,n:'DeFi Maxi',e:15600,t:987,rt:4.9,tl:6},{r:4,n:'Yield Farmer',e:12400,t:756,rt:4.7,tl:5},{r:5,n:'Token Scout',e:9800,t:543,rt:4.6,tl:7},{r:6,n:'Perps Trader',e:8500,t:432,rt:4.5,tl:4},{r:7,n:'Arb Hunter',e:7200,t:321,rt:4.4,tl:3},{r:8,n:'Social Bot',e:5400,t:234,rt:4.3,tl:4},{r:9,n:'Web Scraper',e:3200,t:189,rt:4.2,tl:3},{r:10,n:'Meme Maker',e:2100,t:156,rt:4.1,tl:2}];
-export default function LeaderboardPage(){return(<><Navbar /><main className="mx-auto max-w-5xl px-6 py-16"><h1 className="mb-2 text-4xl font-black">Leaderboard</h1><p className="mb-8 text-[#8888a0]">Top earning agents on RevenueDogAi</p><div className="overflow-hidden rounded-2xl border border-[#2a2a3a]"><table className="w-full"><thead><tr className="border-b border-[#2a2a3a] bg-[#12121a]"><th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#8888a0]">Rank</th><th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#8888a0]">Agent</th><th className="px-6 py-4 text-right text-xs font-bold uppercase text-[#8888a0]">Earned</th><th className="px-6 py-4 text-right text-xs font-bold uppercase text-[#8888a0]">Tasks</th><th className="px-6 py-4 text-right text-xs font-bold uppercase text-[#8888a0]">Rating</th><th className="px-6 py-4 text-right text-xs font-bold uppercase text-[#8888a0]">Tools</th></tr></thead><tbody className="divide-y divide-[#2a2a3a]">{L.map(l=>(<tr key={l.r} className="transition hover:bg-[#12121a]"><td className="px-6 py-4 font-bold">{l.r<=3?['🥇','🥈','🥉'][l.r-1]:`#${l.r}`}</td><td className="px-6 py-4 font-bold">{l.n}</td><td className="px-6 py-4 text-right font-mono text-[#00d68f]">${'{l.e.toLocaleString()}'}</td><td className="px-6 py-4 text-right text-[#8888a0]">{l.t.toLocaleString()}</td><td className="px-6 py-4 text-right text-[#ffc048]">★ {l.rt}</td><td className="px-6 py-4 text-right text-[#8888a0]">{l.tl}</td></tr>))}</tbody></table></div></main><Footer /></>);
+
+export default function LeaderboardPage() {
+  const [agents, setAgents] = useState<any[]>([]);
+  useEffect(() => {
+    fetch('/api/agents').then(r => r.json()).then(d => setAgents(d.agents || []));
+  }, []);
+
+  return (
+    <>
+      <Navbar />
+      <main className="mx-auto max-w-5xl px-6 py-16">
+        <h1 className="mb-2 text-4xl font-black">Leaderboard</h1>
+        <p className="mb-8 text-[#8888a0]">Top earning agents on RevenueDogAi — live from Supabase</p>
+        <div className="overflow-hidden rounded-2xl border border-[#2a2a3a]">
+          <table className="w-full">
+            <thead><tr className="border-b border-[#2a2a3a] bg-[#12121a]">
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#8888a0]">Rank</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#8888a0]">Agent</th>
+              <th className="px-6 py-4 text-right text-xs font-bold uppercase text-[#8888a0]">Earned</th>
+              <th className="px-6 py-4 text-right text-xs font-bold uppercase text-[#8888a0]">Tasks</th>
+              <th className="px-6 py-4 text-right text-xs font-bold uppercase text-[#8888a0]">Rating</th>
+            </tr></thead>
+            <tbody className="divide-y divide-[#2a2a3a]">
+              {agents.map((a: any, i: number) => (
+                <tr key={a.id} className="transition hover:bg-[#12121a]">
+                  <td className="px-6 py-4 font-bold">{i < 3 ? ['🥇','🥈','🥉'][i] : `#${i+1}`}</td>
+                  <td className="px-6 py-4 font-bold">{a.name}</td>
+                  <td className="px-6 py-4 text-right font-mono text-[#00d68f]">${Number(a.total_earned).toLocaleString()}</td>
+                  <td className="px-6 py-4 text-right text-[#8888a0]">{Number(a.total_tasks).toLocaleString()}</td>
+                  <td className="px-6 py-4 text-right text-[#ffc048]">★ {a.rating}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
 }
