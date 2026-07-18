@@ -1,34 +1,34 @@
+import { createClient } from '@supabase/supabase-js';
+
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const KEY = process.env.SUPABASE_SERVICE_KEY || '';
 
+// Disable realtime to prevent WebSocket timeout
+const supabase = createClient(URL, KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+  realtime: { params: { eventsPerSecond: 0 } }
+});
+
 export async function supaQuery(table, select, order) {
   select = select || '*';
-  let url = URL + '/rest/v1/' + table + '?select=' + select;
-  if (order) url += '&order=' + order;
-  const res = await fetch(url, {
-    headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY },
-    signal: AbortSignal.timeout(30000)
-  });
-  if (!res.ok) throw new Error('DB: ' + res.status);
-  return res.json();
+  let query = supabase.from(table).select(select);
+  if (order) {
+    const [col, dir] = order.split('.');
+    query = query.order(col, { ascending: dir === 'asc' });
+  }
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  return data;
 }
 
 export async function supaInsert(table, data) {
-  const res = await fetch(URL + '/rest/v1/' + table, {
-    method: 'POST',
-    headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-    body: JSON.stringify(data),
-    signal: AbortSignal.timeout(30000)
-  });
-  if (!res.ok) throw new Error('DB: ' + res.status + ' ' + await res.text());
-  return res.json();
+  const { data: result, error } = await supabase.from(table).insert(data).select();
+  if (error) throw new Error(error.message);
+  return result;
 }
 
 export async function supaFilter(table, column, value) {
-  const res = await fetch(URL + '/rest/v1/' + table + '?' + column + '=eq.' + value + '&select=*', {
-    headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY },
-    signal: AbortSignal.timeout(30000)
-  });
-  if (!res.ok) throw new Error('DB: ' + res.status);
-  return res.json();
+  const { data, error } = await supabase.from(table).select('*').eq(column, value);
+  if (error) throw new Error(error.message);
+  return data;
 }
