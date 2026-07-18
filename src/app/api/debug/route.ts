@@ -11,7 +11,7 @@ export async function GET() {
     });
     const data = await res.json();
     return NextResponse.json({ envSet: keyLen > 10, url, keyStart, status: res.status, agents: data });
-  } catch (e) {
+  } catch (e: any) {
     return NextResponse.json({ envSet: keyLen > 10, url, keyStart, error: e.message });
   }
 }
