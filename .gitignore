@@ -1,0 +1,6 @@
+node_modules/
+.next/
+.env
+.env.local
+setup_supabase.js
+test_pg.js
